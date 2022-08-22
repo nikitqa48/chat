@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  db:
+    image: postgres
+    container_name: db_chat
+    volumes:
+      - db_chat_vol:/var/lib/postgresql/data
+    env_file:
+      - .env
+  api:
+    build: ./
+    container_name: fatcode_chat
+    image: fast-test
+    command: "uvicorn config.main:app --reload --workers 1 --host 0.0.0.0 --port 8008"
+    ports:
+      - 8010:8008
+    volumes:
+      - ./:/app
+volumes:
+  db_chat_vol:
