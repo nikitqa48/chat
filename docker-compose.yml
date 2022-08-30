@@ -12,10 +12,12 @@ services:
     build: ./
     container_name: fatcode_chat
     image: fast-test
-    command: "uvicorn config.main:app --reload --workers 1 --host 0.0.0.0 --port 8008"
+    command: "uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8010"
     ports:
-      - 8010:8008
+      - 8010:8010
     volumes:
       - ./:/app
+    env_file:
+      - .env
 volumes:
   db_chat_vol:
