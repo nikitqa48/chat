@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from sqlalchemy import create_engine
 from config.settings import settings
 from src import router

@@ -1,7 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
 import requests
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -14,3 +13,4 @@ def validate_token(token):
     if request.status_code == 401:
         return False
     return True
+
