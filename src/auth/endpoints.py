@@ -1,30 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
-from src.middleware import oauth2_scheme, validate_token
+from src.middleware import oauth2_scheme, get_user_by_token
 from src.auth.manager import ConnectionManager
 
 auth = APIRouter()
 manager = ConnectionManager()
 
 
-@auth.get('/')
-def hello_world(token: str = Depends(oauth2_scheme)):
-    return 'ok'
-
-
-@auth.websocket('/connect/{token}/')
-async def websocket_endpoint(websocket: WebSocket, token: str):
-    if validate_token(token):
-        await manager.connect(websocket, token)
+@auth.websocket('/connect/{token}/{room}/')
+async def websocket_endpoint(websocket: WebSocket, token: str, room: str):
+    user = get_user_by_token(token)
+    if user:
+        await manager.connect(websocket, room, user)
         while True:
             try:
                 data = await websocket.receive_text()
                 response = {
-                    "sender": token,
+                    "sender": user,
                     "message": data
                 }
-                await manager.broadcast(response)
+                await manager.broadcast(response, room)
             except WebSocketDisconnect:
-                manager.disconnect(websocket, token)
-                await manager.broadcast(f"Client #{token} left the chat")
+                manager.disconnect(websocket, room, user)
+                await manager.broadcast(f"Client #'{user}' left the chat", room)
             except RuntimeError:
                 break
