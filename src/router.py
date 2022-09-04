@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from src.auth.endpoints import auth
+from src.chat.endpoints import chat
 
 
 router = APIRouter()
-router.include_router(auth, tags=('auth',))
+router.include_router(chat, tags=('chat',))

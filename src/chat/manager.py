@@ -10,7 +10,6 @@ class ConnectionManager:
         await websocket.accept()
         self.connections[room] = []
         self.connections[room].append((websocket, user))
-        print(self.connections[room])
 
     async def broadcast(self, data: str, room: str):
         for connection in self.connections[room]:

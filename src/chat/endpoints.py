@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
-from src.middleware import oauth2_scheme, get_user_by_token
-from src.auth.manager import ConnectionManager
+from src.middleware import get_user_by_token
+from src.chat.manager import ConnectionManager
 
-auth = APIRouter()
+chat = APIRouter()
 manager = ConnectionManager()
 
 
-@auth.websocket('/connect/{token}/{room}/')
+@chat.websocket('/connect/{token}/{room}/')
 async def websocket_endpoint(websocket: WebSocket, token: str, room: str):
     user = get_user_by_token(token)
     if user:

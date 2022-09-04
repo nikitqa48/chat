@@ -1,9 +1,8 @@
 from fastapi import FastAPI, WebSocket
-from sqlalchemy import create_engine
-from config.settings import settings
+from config.database import SessionLocal, engine
+from src.chat import models
 from src import router
 
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.include_router(router.router)
