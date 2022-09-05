@@ -1,6 +1,6 @@
 from config.database import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.types import Date
+from sqlalchemy.types import DATETIME
 from sqlalchemy.orm import relationship
 
 
@@ -12,6 +12,7 @@ class User(Base):
     first_name = Column(String(255))
     last_name = Column(String(255))
     middle_name = Column(String(255))
+    avatar = Column(String)
 
 
 class Room(Base):
@@ -28,8 +29,8 @@ class Message(Base):
     room_id = Column(Integer, ForeignKey('room.id'), nullable=False, index=True)
     room = relationship('Room', foreign_keys=[room_id])
     text = Column(String)
-    created = Column(Date, index=True)
-    updated = Column(Date)
+    created = Column(DATETIME, index=True)
+    updated = Column(DATETIME)
     read = Column(Boolean)
 
 

@@ -9,6 +9,7 @@ class User(BaseModel):
     first_name: str
     last_name: str
     middle_name: str
+    avatar: str
 
     class Config:
         orm_mode = True
