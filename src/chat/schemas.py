@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -27,8 +27,8 @@ class Message(BaseModel):
     id: int
     author: User
     text: str
-    created: date
-    updated: date
+    created: datetime
+    updated: datetime
     read: bool
 
     class Config:
