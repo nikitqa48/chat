@@ -16,7 +16,7 @@ class ConnectionManager:
         for connection in self.connections[room]:
             await connection[0].send_json(data)
 
-    def disconnect(self, websocket: WebSocket, room: str, user: models.User):
+    async def disconnect(self, websocket: WebSocket, room: str, user: models.User):
         self.connections[room].remove((websocket, user))
 
 
@@ -38,5 +38,3 @@ def get_or_create_room(db, json):
     return room
 
 
-class ChatManager:
-    pass

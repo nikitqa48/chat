@@ -4,7 +4,6 @@ from src.chat.manager import ConnectionManager, get_or_create_user, get_or_creat
 from sqlalchemy.orm import Session
 from config.database import get_db
 from src.chat import models
-from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 
 
@@ -34,7 +33,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str, room: str, db: Se
                 }
                 await manager.broadcast(response, room)
             except WebSocketDisconnect:
-                manager.disconnect(websocket, room, user)
+                await manager.disconnect(websocket, room, user)
                 await manager.broadcast(f"Client #'{user_json}' left the chat", room)
             except RuntimeError:
                 break
