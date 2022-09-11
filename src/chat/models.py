@@ -17,7 +17,7 @@ class User(Base):
     middle_name = Column(String(255))
     avatar = Column(String)
 
-    def create_message(self, db, room, text):
+    async def create_message(self, db, room, text):
         message = Message(author=self, room=room, text=text, created=datetime.now())
         db.add(message)
         return db.commit()

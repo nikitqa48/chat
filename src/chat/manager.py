@@ -20,7 +20,7 @@ class ConnectionManager:
         self.connections[room].remove((websocket, user))
 
 
-def get_or_create_user(db, data):
+async def get_or_create_user(db, data):
     user = db.query(models.User).get(data['id'])
     if user is None:
         user = models.User(**data)
@@ -29,7 +29,7 @@ def get_or_create_user(db, data):
     return user
 
 
-def get_or_create_room(db, json):
+async def get_or_create_room(db, json):
     room = db.query(models.Room).filter_by(name=json).first()
     if room is None:
         room = models.Room(name=json)

@@ -1,8 +1,13 @@
 from fastapi import FastAPI, WebSocket
-from config.database import SessionLocal, engine
-from src.chat import models
 from src import router
+from config.database import Base, engine
 
-models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 app.include_router(router.router)
+
+
+@app.on_event('startup')
+async def init_models():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

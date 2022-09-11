@@ -15,18 +15,17 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, token: str, room: str, db: Session = Depends(get_db)):
     user_json = get_user_by_token(token)
     if user_json:
-        user = get_or_create_user(db, user_json)
-        room_obj = get_or_create_room(db, room)
-        await manager.connect(websocket, room, user)
-        # connections = manager.connections[room]
-        participiants = db.query(models.Participant).filter_by(room=room_obj).all()
-        if not participiants or not any(user == x.user for x in participiants):
+        user = await get_or_create_user(db, user_json)
+        room_obj = await get_or_create_room(db, room)
+        members = db.query(models.Participant).filter_by(room=room_obj).all()
+        if not members or not any(user == x.user for x in members):
             # Если нет участников в комнате, то создать участника в бд
             room_obj.create_participiant(db, user)
+        await manager.connect(websocket, room, user)
         while True:
             try:
                 data = await websocket.receive_text()
-                user.create_message(db, room_obj, data)
+                await user.create_message(db, room_obj, data)
                 response = {
                     "sender": user_json['username'],
                     "message": data
@@ -47,13 +46,13 @@ def get_history(room: str, token: str = Depends(oauth2_scheme),  db: Session = D
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Forbidden"
         )
-    user = db.query(models.User).get(get_user['id'])
+    user = db.select(models.User).get(get_user['id'])
     room = db.query(models.Room).filter_by(name=room).first()
     participiant = db.query(models.Participant).filter_by(room=room, user=user).first()
     if participiant is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
+            detail="You have not access"
         )
     messages = db.query(models.Message).filter_by(room=room).all()
     data = []
