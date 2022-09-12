@@ -16,11 +16,22 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, token: str, room: str, db: Session = Depends(get_db)):
     user_json = get_user_by_token(token)
     user = await get_or_create_user(db, user_json)
+    room_obj = await get_or_create_room(db, room)
+    members_query = await db.execute(
+        select(models.Participant).where(
+            models.Participant.room_id == room_obj[0].id
+        ).where(
+            models.Participant.user == user
+        )
+    )
+    members = members_query.all()
+    if members is None:
+        await room_obj.create_participiant(db, user)
     await manager.connect(websocket, room, user)
     while True:
         try:
             data = await websocket.receive_text()
-            # await user.create_message(db, room_obj, data)
+            await user.create_message(db, room_obj[0], data)
             response = {
                 "sender": user_json['username'],
                 "message": data
@@ -31,30 +42,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str, room: str, db: Se
             await manager.broadcast(f"Client #'{user_json}' left the chat", room)
         except RuntimeError:
             break
-
-    # user_json = get_user_by_token(token)
-    # if user_json:
-    #     user = await get_or_create_user(db, user_json)
-    #     room_obj = await get_or_create_room(db, room)
-    #     members = db.query(models.Participant).filter_by(room=room_obj).all()
-    #     if not members or not any(user == x.user for x in members):
-    #         # Если нет участников в комнате, то создать участника в бд
-    #         room_obj.create_participiant(db, user)
-    #     await manager.connect(websocket, room, user)
-    #     while True:
-    #         try:
-    #             data = await websocket.receive_text()
-    #             await user.create_message(db, room_obj, data)
-    #             response = {
-    #                 "sender": user_json['username'],
-    #                 "message": data
-    #             }
-    #             await manager.broadcast(response, room)
-    #         except WebSocketDisconnect:
-    #             await manager.disconnect(websocket, room, user)
-    #             await manager.broadcast(f"Client #'{user_json}' left the chat", room)
-    #         except RuntimeError:
-    #             break
 
 
 @chat.get('/history/{room}/')
@@ -68,6 +55,7 @@ async def get_history(room: str, token: str = Depends(oauth2_scheme),  db: Sessi
     user = await db.get(models.User, get_user['id'])
     room_obj = await db.execute(select(models.Room).where(models.Room.name == room))
     participiant = await db.execute(select(models.Participant).where(models.Room == room_obj.first(), user == user))
+    print(participiant.all())
     if participiant.first() is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

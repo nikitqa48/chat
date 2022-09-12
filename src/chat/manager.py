@@ -1,6 +1,8 @@
 from fastapi import WebSocket
 from collections import defaultdict
 from src.chat import models
+from sqlalchemy.future import select
+from sqlalchemy import text
 
 
 class ConnectionManager:
@@ -29,12 +31,13 @@ async def get_or_create_user(db, data):
     return user
 
 
-async def get_or_create_room(db, json):
-    room = db.query(models.Room).filter_by(name=json).first()
-    if room is None:
-        room = models.Room(name=json)
+async def get_or_create_room(db, name: str):
+    room = await db.execute(select(models.Room).where(models.Room.name == name))
+    result = room.first()
+    if result is None:
+        result = models.Room(name=name)
         db.add(room)
-        db.commit()
-    return room
+        await db.commit()
+    return result
 
 

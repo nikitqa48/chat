@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, relationship
 from config.database import get_db
 
 
@@ -20,7 +20,8 @@ class User(Base):
     async def create_message(self, db, room, text):
         message = Message(author=self, room=room, text=text, created=datetime.now())
         db.add(message)
-        return db.commit()
+        await db.commit()
+        return message
 
 
 class Room(Base):
