@@ -21,11 +21,11 @@ class ConnectionManager:
 
 
 async def get_or_create_user(db, data):
-    user = db.query(models.User).get(data['id'])
+    user = await db.get(models.User, data['id'])
     if user is None:
         user = models.User(**data)
         db.add(user)
-        db.commit()
+        await db.commit()
     return user
 
 
