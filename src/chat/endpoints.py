@@ -46,23 +46,22 @@ manager = ChatManager()
 
 @chat.get('/history/{room}/')
 async def get_history(room: str, token: str = Depends(oauth2_scheme),  db: Session = Depends(get_db)):
-    pass
-    # get_user = get_user_by_token(token)
-    # if not get_user:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Forbidden"
-    #     )
-    # user = await db.get(models.User, get_user['id'])
-    # room_obj = await db.execute(select(models.Room).where(models.Room.name == room))
-    # participiant = await db.execute(select(models.Participant).where(models.Room == room_obj.first(), user == user))
-    # if participiant.first() is None:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="You have not access"
-    #     )
-    # messages = await db.execute(select(models.Message).where(models.Room == room))
-    # data = []
-    # for message in messages.all():
-    #     data.append(jsonable_encoder(message))
-    # return data
+    get_user = get_user_by_token(token)
+    if not get_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Forbidden"
+        )
+    user = await db.get(models.User, get_user['id'])
+    room_obj = await db.execute(select(models.Room).where(models.Room.name == room))
+    participiant = await db.execute(select(models.Participant).where(models.Room == room_obj.first(), user == user))
+    if participiant.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You have not access"
+        )
+    messages = await db.execute(select(models.Message).where(models.Room == room))
+    data = []
+    for message in messages.all():
+        data.append(jsonable_encoder(message))
+    return data
